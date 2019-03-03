@@ -430,14 +430,83 @@
         };
         self.openNodeEditDialog = function(msg) {
             const html = `
-<body style="margin: 0; position: fixed; top: 0; bottom: 0; right: 0; left: 0; display: flex; justify-content: center; align-items: center; background-color: #FFF8">
-<div id="edit_box" style="background: lightgray; border: 2px outset grey; width: 480px">
-<form id="edit_box_form" style="width: 100%">
-<p id="edit_box_title" style="margin: 5px; font-weight: bold"></p>
-<table style="width: 100%; margin: 10px">
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    margin: 0;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #FFF8;
+    font-size: 10pt;
+    font-family: arial, sans-serif;
+}
+form#edit_box_form {
+    width: 100%;
+}
+p#edit_box_title {
+    margin: 5px;
+    font-weight: bold;
+    font-size: 11pt;
+}
+div#edit_box {
+    background: whitesmoke;
+    border: 1px outset lightgray;
+    width: 480px;
+    padding: 5px;
+    box-shadow: 5px 5px 10px 5px rgba(0,0,0,0.3);
+}
+td.label {
+    width: 60px;
+}
+textarea.valField {
+    word-break: break-all;
+}
+textarea.valField, input.valField {
+    width: 400px;
+}
+.valField {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 9pt;
+}
+table#main {
+    width: 100%;
+    margin: 10px;
+}
+select.tmpSel {
+    position: absolute;
+    display: none;
+}
+div.wrapTmpSel {
+    position: relative;
+}
+p#btnPara {
+    text-align: center;
+    margin: 5px;
+}
+.btnMargin {
+    margin-left: 2rem;
+}
+input.btn {
+    padding: 2px 20px;
+}
+</style>
+</head>
+<body>
+<div id="edit_box">
+<form id="edit_box_form">
+<p id="edit_box_title"></p>
+<table class="main">
     <!-- form -->
     <tr class="row_form">
-    <td style="width: 80px">Method</td>
+    <td class="label">Method</td>
     <td>
     <label><input type="radio" name="i_method" value="get" checked>GET</label>
     <label><input type="radio" name="i_method" value="post">POST</label>
@@ -445,11 +514,11 @@
     </tr>
 
     <tr class="row_form">
-    <td>Enctype</td>
+    <td class="label">Enctype</td>
     <td>
-    <input type="text" name="i_enctype" style="width: 360px"><br>
-    <div style="position: relative">
-    <select name="i_enctype_sel" size="4" style="display: none; position: absolute" class="tmpSel">
+    <input type="text" name="i_enctype" class="valField"><br>
+    <div class="wrapTmpSel">
+    <select name="i_enctype_sel" size="4" class="tmpSel valField">
     <option value="">--</option>
     <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
     <option value="multipart/form-data">multipart/form-data</option>
@@ -460,11 +529,11 @@
     </tr>
 
     <tr class="row_form">
-    <td>Target</td>
+    <td class="label">Target</td>
     <td>
-    <input type="text" name="i_target" style="width: 360px"><br>
-    <div style="position: relative">
-    <select name="i_target_sel" size="5" style="display: none; position: absolute" class="tmpSel">
+    <input type="text" name="i_target" class="valField"><br>
+    <div class="wrapTmpSel">
+    <select name="i_target_sel" size="5" class="tmpSel valField">
     <option value="">--</option>
     <option value="_blank">_blank</option>
     <option value="_self">_self</option>
@@ -476,51 +545,51 @@
     </tr>
 
     <tr class="row_form">
-    <td>Action</td>
+    <td class="label">Action</td>
     <td>
-    <textarea name="i_action" rows="3" style="width: 360px" class="autofocus"></textarea>
+    <textarea name="i_action" rows="4" class="autofocus valField"></textarea>
     </td>
     </tr>
 
     <!-- input -->
     <tr class="row_input">
-    <td style="width: 80px"><label for="i_disabled">Disabled</label></td>
+    <td class="label"><label for="i_disabled">Disabled</label></td>
     <td>
     <input type="checkbox" name="i_disabled" id="i_disabled">
     </td>
     </tr>
 
     <tr class="row_input">
-    <td>Name</td>
+    <td class="label">Name</td>
     <td>
-    <input type="text" name="i_name" value="" style="width: 360px">
+    <input type="text" name="i_name" value="" class="valField">
     </td>
     </tr>
 
     <tr class="row_input">
-    <td>Value</td>
+    <td class="label">Value</td>
     <td>
-    <textarea name="i_value" rows="3" style="width: 360px" class="autofocus"></textarea>
+    <textarea name="i_value" rows="4" class="autofocus valField"></textarea>
     </td>
     </tr>
 
     <!-- url -->
     <tr class="row_url">
-    <td style="width: 80px">URL</td>
+    <td class="label">URL</td>
     <td>
-    <textarea name="i_url" rows="4" style="width: 360px" class="autofocus"></textarea>
+    <textarea name="i_url" rows="5" class="autofocus valField"></textarea>
     </td>
     </tr>
 
     </table>
 
-    <p style="text-align: center; margin: 5px">
-    <input type="submit" value="OK">
-    <input type="button" value="Cancel" name="i_cancelBtn" style="margin-left: 2rem">
-    <label style="display: none"><input type="checkbox" name="i_multiline" style="margin-left: 2rem">multiline</label>
+    <p id="btnPara">
+    <input type="submit" value="OK" class="btn">
+    <input type="button" value="Cancel" name="i_cancelBtn" class="btn btnMargin">
+    <label style="display: none"><input type="checkbox" name="i_multiline" class="btnMargin">multiline</label>
     </p>
 </form>
-</div><!-- /#edit_box --></body>`;
+</div><!-- /#edit_box --></body></html>`;
             const ndtype = msg.ndtype;
             const editArgs = msg.editArgs;
 
@@ -553,7 +622,7 @@
 
                 txtElm.onclick = (ev) => {
                     ev.cancelBubble = true;
-                    const toDisp = selElm.style.display = selElm.style.display == 'none';
+                    const toDisp = selElm.style.display != 'inline-block';
                     hideTmpSel();
                     selElm.style.display = toDisp ? 'inline-block' : 'none';
                 };
