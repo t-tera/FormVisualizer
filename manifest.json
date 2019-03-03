@@ -1,0 +1,41 @@
+{
+  "description": "A small Firefox extension for web app security testers. It allows visualize (and manipulating) form elements and removing all cookies.",
+  "manifest_version": 2,
+  "name": "FormVisualizer",
+  "version": "1.0",
+  "homepage_url": "https://www.mbsd.jp/",
+  "icons": {
+    "48": "icons/icon.svg"
+  },
+
+  "permissions": ["cookies","<all_urls>","activeTab", "storage", "browsingData", "contextualIdentities", "privacy", "menus"],
+
+  "browser_action": {
+    "default_icon": "icons/icon.svg",
+    "default_title": "FormVisualizer",
+    "default_popup": "popup/menu.html"
+  },
+
+  "content_scripts": [
+    {"matches": ["*://*/*"],
+	 "js": ["js/content/cs_main.js"],
+     "all_frames": true}
+  ],
+
+  "web_accessible_resources": [],
+
+  "background": {
+    "scripts": ["js/common/cm_main.js", "js/background/bg_main.js"]
+  },
+
+  "commands": {
+    "form-visualizer.clear-cookies": {
+      "suggested_key": {"default": "Alt+Ctrl+D"},
+      "description": "Clear all cookies"
+    },
+    "form-visualizer.tgl-visualize-form": {
+      "suggested_key": {"default": "Alt+Ctrl+F"},
+      "description": "Visualize form"
+    }
+  }
+}
