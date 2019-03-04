@@ -18,29 +18,53 @@
         setTimeout(() => {style.opacity = origOpacity}, 150);
     };
 
+    const enableDragMove = (grabElm, moveElm) => {
+        var self = this;
+
+        self.dragElm = null;
+        self.moveElm = moveElm;
+
+        self.onMouseDown = function(ev) {
+            ev.cancelBubble = true;
+            self.moveElm.myOffset = {x: moveElm.offsetLeft - ev.clientX, y: moveElm.offsetTop - ev.clientY};
+            self.dragElm = this;
+        }
+
+        self.onMouseMoveDoc = function(ev) {
+            if (self.dragElm == null) {
+                return true;
+            }
+
+            var elm = self.moveElm;
+            elm.style.left = (ev.clientX + elm.myOffset.x) + 'px';
+            elm.style.top  = (ev.clientY + elm.myOffset.y) + 'px';
+
+            return false;
+        };
+
+        self.onMouseUpDoc = function(ev) {
+            self.dragElm = null;
+        };
+
+        var doc = moveElm.ownerDocument;
+        doc.addEventListener("mousemove", self.onMouseMoveDoc, false);
+        doc.addEventListener("mouseup", self.onMouseUpDoc, false);
+        grabElm.onmousedown = self.onMouseDown;
+    };
+
     const FormVisualizer = () => {
         var self = FormVisualizer;
 
         self.tglVisualize = function() {
             var newstat = !self.getCurrentStat();
-            self.markStatFlg(newstat);
+            self.setStatFlg(newstat);
             self.toggleVisualizer(newstat);
         };
         self.getCurrentStat = function() {
-            return self.exist(document.getElementById('stat' + NAME_PREFIX));
+            return window[NAME_PREFIX].stat;
         };
-        self.markStatFlg = function(newstat) {
-            var d = document;
-            if (newstat) {
-                var statelm = d.createElement('span');
-                statelm.id = 'stat' + NAME_PREFIX;
-                statelm.style.display = 'none';
-                d.body.appendChild(statelm);
-            }
-            else {
-                var statelm = d.getElementById('stat' + NAME_PREFIX);
-                statelm.parentNode.removeChild(statelm);
-            }
+        self.setStatFlg = function(newstat) {
+            window[NAME_PREFIX].stat = newstat;
         };
         self.toggleVisualizer = function(s) {
             s ? self.visualizerDocOn() : self.visualizerDocOff();
@@ -115,7 +139,7 @@
                 return {node: n,
                         ndtype: 'form',
                         editArgs: {method: n.method, action: n.action, enctype: n.enctype, target: n.target},
-                        color: 'hotpink',
+                        color: '#f9c',
                         editable: true,
                         pos: 0};
             }
@@ -187,9 +211,15 @@
             span.style.color = 'black';
             span.style.fontStyle = 'normal';
             span.style.fontWeight = 'normal';
-            span.style.fontSize = '12px';
+            span.style.fontSize = '9pt';
             span.style.fontFamily = 'sans-serif';
-            span.style.marginRight = '4px';
+            span.style.margin = '0 4px 0 0';
+            span.style.padding = '0 2px';
+            span.style.textIndent = 0;
+            span.style.lineHeight = "12pt";
+            span.style.wordBreak = 'break-all';
+            span.style.display = 'inline-block';
+            span.style.whiteSpace = 'nowrap';
 
             if (n instanceof HTMLElement) {
                 var tag = self.getTagName(n);
@@ -369,7 +399,7 @@
             }
             else if (tag == 'input') {
                 var retnds = [];
-                retnds.push(d.createTextNode(n.type + dl));
+                retnds.push(d.createTextNode(self.shortenInputType(n.type) + dl));
                 var bldnd = d.createElement('b');
                 bldnd.textContent = self.shorten(name);
                 bldnd.addEventListener('click', cf2, false);
@@ -407,6 +437,10 @@
                 ndtype: span.ndtype
             });
         };
+        self.openEditWinByNode = function(n) {
+            var span = self.visualizeNode(n);
+            self.openEditWin(span);
+        };
         self.removeAllChildren = function(n) {
             while (n.lastChild) {
                 n.removeChild(n.lastChild);
@@ -424,9 +458,14 @@
         self.shorten = function(s) {
             if (!self.exist(s)) {return '';}
 
-            var maxlen=60;
-            var snipmark='...[snip]...';
-            return s.length > maxlen + snipmark.length ? s.substr(0,maxlen / 2) + snipmark + s.substr(-maxlen / 2) : s;
+            var maxlen = 60;
+            var snipmark = '\u2026\u2026';
+            return (s.length > maxlen + snipmark.length)
+                ? s.substr(0, maxlen / 2 - 1) + snipmark + s.substr(-maxlen / 2 + 1) : s;
+        };
+        self.shortenInputType = function(type) {
+            const map = {checkbox: "check"};
+            return self.exist(map[type]) ? map[type] : type;
         };
         self.openNodeEditDialog = function(msg) {
             const html = `
@@ -436,32 +475,39 @@
 <style>
 body {
     margin: 0;
-    position: fixed;
+    padding: 0;
     top: 0;
     bottom: 0;
     right: 0;
     left: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: fixed;
     background-color: #FFF8;
     font-size: 10pt;
     font-family: arial, sans-serif;
-}
-form#edit_box_form {
-    width: 100%;
-}
-p#edit_box_title {
-    margin: 5px;
-    font-weight: bold;
-    font-size: 11pt;
+    user-select: none;
+    -moz-user-select: none;
 }
 div#edit_box {
     background: whitesmoke;
     border: 1px outset lightgray;
-    width: 480px;
-    padding: 5px;
+    width: 490px;
+    padding: 0;
     box-shadow: 5px 5px 10px 5px rgba(0,0,0,0.3);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+p#edit_box_title {
+    margin: 0;
+    padding: 5px;
+    font-weight: bold;
+    font-size: 11pt;
+    background: gainsboro;
+}
+form#edit_box_form {
+    width: 100%;
+    margin: 5px;
 }
 td.label {
     width: 60px;
@@ -473,7 +519,7 @@ textarea.valField, input.valField {
     width: 400px;
 }
 .valField {
-    font-family: Consolas, "Courier New", monospace;
+    font-family: Consolas, Osaka-mono, "Courier New", monospace;
     font-size: 9pt;
 }
 table#main {
@@ -501,8 +547,8 @@ input.btn {
 </head>
 <body>
 <div id="edit_box">
-<form id="edit_box_form">
 <p id="edit_box_title"></p>
+<form id="edit_box_form">
 <table class="main">
     <!-- form -->
     <tr class="row_form">
@@ -683,6 +729,7 @@ input.btn {
                     const doCancel = (ev) => {editDone(ev, true)};
 
                     ifrmdoc.body.onclick = form.i_cancelBtn.onclick = doCancel;
+                    ifrmdoc.body.onkeydown = (ev) => {if (ev.keyCode == 27) {doCancel(ev)}};
                     form.onsubmit = (ev) => {return formOnSubmit(ev, form)};
 
                     setupTmpSel(form, "i_enctype");
@@ -692,6 +739,8 @@ input.btn {
                         ev.cancelBubble = true;
                         hideTmpSel(ifrm);
                     };
+
+                    enableDragMove(editBoxTitle, editBox);
 
                     const rowElms = form.getElementsByTagName("table").item(0)
                         .getElementsByTagName("tr");
@@ -831,9 +880,7 @@ input.btn {
         }
         else if (msg.command === "form-visualizer.edit-link") {
             const n = browser.menus.getTargetElement(msg.opts.targetElmentId);
-            const span = FormVisualizer.visualizeNode(n);
-            FormVisualizer.openEditWin(span);
+            FormVisualizer.openEditWinByNode(n);
         }
     });
 })();
-
