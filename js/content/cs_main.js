@@ -130,7 +130,7 @@
             if (["input", "select", "option", "textarea"].indexOf(tag) > -1) {
                 return {node: n,
                         ndtype: 'input',
-                        editArgs: {name: n.name, value: n.value, disabled: n.disabled},
+                        editArgs: {},
                         color: tag == 'option' ? 'greenyellow' : 'yellow',
                         editable: tag != 'option' && self.exist(n.name),
                         pos: tag == 'option' ? 2 : 1};
@@ -138,7 +138,7 @@
             else if (["form"].indexOf(tag) > -1) {
                 return {node: n,
                         ndtype: 'form',
-                        editArgs: {method: n.method, action: n.action, enctype: n.enctype, target: n.target},
+                        editArgs: {},
                         color: '#f9c',
                         editable: true,
                         pos: 0};
@@ -233,6 +233,8 @@
                 span.style.cursor = 'pointer';
 
                 var cf = function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
                     e.cancelBubble = true;
                     self.openEditWin(this);
                 };
@@ -380,11 +382,6 @@
             var tag = self.getTagName(n);
             var name = tag == 'form' ? n.getAttribute('name') : n.name;
 
-            var cf2 = function(e) {
-                e.cancelBubble = true;
-                self.openEditWin(this.parentNode);
-            };
-
             if (tag == 'form') {
                 return [d.createTextNode(tag + dl + self.getMethod(n) + dl + self.shorten(self.getFormAction(n)))];
             }
@@ -393,7 +390,6 @@
                 retnds.push(d.createTextNode(tag + dl));
                 var bldnd = d.createElement('b');
                 bldnd.textContent = self.shorten(name);
-                bldnd.addEventListener('click', cf2, false);
                 retnds.push(bldnd);
                 return retnds;
             }
@@ -402,7 +398,6 @@
                 retnds.push(d.createTextNode(self.shortenInputType(n.type) + dl));
                 var bldnd = d.createElement('b');
                 bldnd.textContent = self.shorten(name);
-                bldnd.addEventListener('click', cf2, false);
                 retnds.push(bldnd);
                 retnds.push(d.createTextNode(dl + self.shorten(n.value)));
                 return retnds;
@@ -468,175 +463,9 @@
             return self.exist(map[type]) ? map[type] : type;
         };
         self.openNodeEditDialog = function(msg) {
-            const html = `
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-body {
-    margin: 0;
-    padding: 0;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    position: fixed;
-    background-color: #FFF8;
-    font-size: 10pt;
-    font-family: arial, sans-serif;
-    user-select: none;
-    -moz-user-select: none;
-}
-div#edit_box {
-    background: whitesmoke;
-    border: 1px outset lightgray;
-    width: 490px;
-    padding: 0;
-    box-shadow: 5px 5px 10px 5px rgba(0,0,0,0.3);
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-p#edit_box_title {
-    margin: 0;
-    padding: 5px;
-    font-weight: bold;
-    font-size: 11pt;
-    background: gainsboro;
-}
-form#edit_box_form {
-    width: 100%;
-    margin: 5px;
-}
-td.label {
-    width: 60px;
-}
-textarea.valField {
-    word-break: break-all;
-}
-textarea.valField, input.valField {
-    width: 400px;
-}
-.valField {
-    font-family: Consolas, Osaka-mono, "Courier New", monospace;
-    font-size: 9pt;
-}
-table#main {
-    width: 100%;
-    margin: 10px;
-}
-select.tmpSel {
-    position: absolute;
-    display: none;
-}
-div.wrapTmpSel {
-    position: relative;
-}
-p#btnPara {
-    text-align: center;
-    margin: 5px;
-}
-.btnMargin {
-    margin-left: 2rem;
-}
-input.btn {
-    padding: 2px 20px;
-}
-</style>
-</head>
-<body>
-<div id="edit_box">
-<p id="edit_box_title"></p>
-<form id="edit_box_form">
-<table class="main">
-    <!-- form -->
-    <tr class="row_form">
-    <td class="label">Method</td>
-    <td>
-    <label><input type="radio" name="i_method" value="get" checked>GET</label>
-    <label><input type="radio" name="i_method" value="post">POST</label>
-    </td>
-    </tr>
-
-    <tr class="row_form">
-    <td class="label">Enctype</td>
-    <td>
-    <input type="text" name="i_enctype" class="valField"><br>
-    <div class="wrapTmpSel">
-    <select name="i_enctype_sel" size="4" class="tmpSel valField">
-    <option value="">--</option>
-    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
-    <option value="multipart/form-data">multipart/form-data</option>
-    <option value="text/plain">text/plain</option>
-    </select>
-    </div>
-    </td>
-    </tr>
-
-    <tr class="row_form">
-    <td class="label">Target</td>
-    <td>
-    <input type="text" name="i_target" class="valField"><br>
-    <div class="wrapTmpSel">
-    <select name="i_target_sel" size="5" class="tmpSel valField">
-    <option value="">--</option>
-    <option value="_blank">_blank</option>
-    <option value="_self">_self</option>
-    <option value="_top">_top</option>
-    <option value="_parent">_parent</option>
-    </select>
-    </div>
-    </td>
-    </tr>
-
-    <tr class="row_form">
-    <td class="label">Action</td>
-    <td>
-    <textarea name="i_action" rows="4" class="autofocus valField"></textarea>
-    </td>
-    </tr>
-
-    <!-- input -->
-    <tr class="row_input">
-    <td class="label"><label for="i_disabled">Disabled</label></td>
-    <td>
-    <input type="checkbox" name="i_disabled" id="i_disabled">
-    </td>
-    </tr>
-
-    <tr class="row_input">
-    <td class="label">Name</td>
-    <td>
-    <input type="text" name="i_name" value="" class="valField">
-    </td>
-    </tr>
-
-    <tr class="row_input">
-    <td class="label">Value</td>
-    <td>
-    <textarea name="i_value" rows="4" class="autofocus valField"></textarea>
-    </td>
-    </tr>
-
-    <!-- url -->
-    <tr class="row_url">
-    <td class="label">URL</td>
-    <td>
-    <textarea name="i_url" rows="5" class="autofocus valField"></textarea>
-    </td>
-    </tr>
-
-    </table>
-
-    <p id="btnPara">
-    <input type="submit" value="OK" class="btn">
-    <input type="button" value="Cancel" name="i_cancelBtn" class="btn btnMargin">
-    <label style="display: none"><input type="checkbox" name="i_multiline" class="btnMargin">multiline</label>
-    </p>
-</form>
-</div><!-- /#edit_box --></body></html>`;
             const ndtype = msg.ndtype;
+            const span = document.getElementById(msg.spanId);
+            const rnode = span.relatedNode;
             const editArgs = msg.editArgs;
 
             const ifrm = document.createElement('iframe');
@@ -719,81 +548,85 @@ input.btn {
                 return false;
             };
 
+            const ifrmOnLoad = (ev) => {
+                const ifrmdoc = ifrm.contentDocument;
+                const editBox = ifrmdoc.getElementById("edit_box");
+                const editBoxTitle = ifrmdoc.getElementById("edit_box_title");
+                const form = ifrmdoc.getElementById("edit_box_form");
+                const enterToSubmit = (ev) => {if (ev.keyCode == 13) form.onsubmit(ev)};
+                const doCancel = (ev) => {editDone(ev, true)};
+
+                ifrmdoc.body.onclick = form.i_cancelBtn.onclick = doCancel;
+                ifrmdoc.body.onkeydown = (ev) => {if (ev.keyCode == 27) {doCancel(ev)}};
+                form.onsubmit = (ev) => {return formOnSubmit(ev, form)};
+
+                setupTmpSel(form, "i_enctype");
+                setupTmpSel(form, "i_target");
+
+                editBox.onclick = (ev) => {
+                    ev.cancelBubble = true;
+                    hideTmpSel(ifrm);
+                };
+
+                enableDragMove(editBoxTitle, editBox);
+
+                const rowElms = form.getElementsByTagName("table").item(0)
+                    .getElementsByTagName("tr");
+
+                for (let i = rowElms.length - 1; i >= 0; i--) {
+                    let rowElm = rowElms.item(i);
+                    if (ndtype == "form" && !rowElm.classList.contains("row_form")
+                        || ndtype == "input" && !rowElm.classList.contains("row_input")
+                        || ndtype == "url" && !rowElm.classList.contains("row_url")) {
+                        rowElm.parentNode.removeChild(rowElm);
+                    }
+                }
+
+                if (ndtype == "form") {
+                    editBoxTitle.textContent = "Edit form element";
+                    form.i_method.value = rnode.method ? rnode.method.toLowerCase() : "get";
+                    form.i_enctype.value = rnode.enctype;
+                    form.i_target.value = rnode.target;
+                    form.i_action.value = rnode.action;
+                    form.i_action.onkeydown = enterToSubmit;
+                }
+                else if (ndtype == "input") {
+                    editBoxTitle.textContent = "Edit form control element";
+                    form.i_disabled.checked = rnode.disabled;
+                    form.i_name.value = rnode.name;
+                    form.i_value.value = rnode.value;
+                    form.i_multiline.parentElement.style.display = 'inline';
+                    form.i_multiline.checked = rnode.value.indexOf("\n") > -1;
+                    form.i_value.onkeydown = (ev) => {
+                        if (!form.i_multiline.checked) {
+                            enterToSubmit(ev);
+                        }
+                    };
+                }
+                else {
+                    editBoxTitle.textContent = "Edit URL attribute";
+                    form.i_url.value = editArgs.url;
+                    form.i_url.onkeydown = enterToSubmit;
+                }
+
+                const autoFocus = form.getElementsByClassName("autofocus")[0];
+
+                if (autoFocus) {
+                    autoFocus.focus();
+                    autoFocus.setSelectionRange(0, 0);
+                }
+            };
+
             ifrm.onload = (ev) => {
                 try {
-                    const ifrmdoc = ifrm.contentDocument;
-                    const editBox = ifrmdoc.getElementById("edit_box");
-                    const editBoxTitle = ifrmdoc.getElementById("edit_box_title");
-                    const form = ifrmdoc.getElementById("edit_box_form");
-                    const enterToSubmit = (ev) => {if (ev.keyCode == 13) form.onsubmit(ev)};
-                    const doCancel = (ev) => {editDone(ev, true)};
-
-                    ifrmdoc.body.onclick = form.i_cancelBtn.onclick = doCancel;
-                    ifrmdoc.body.onkeydown = (ev) => {if (ev.keyCode == 27) {doCancel(ev)}};
-                    form.onsubmit = (ev) => {return formOnSubmit(ev, form)};
-
-                    setupTmpSel(form, "i_enctype");
-                    setupTmpSel(form, "i_target");
-
-                    editBox.onclick = (ev) => {
-                        ev.cancelBubble = true;
-                        hideTmpSel(ifrm);
-                    };
-
-                    enableDragMove(editBoxTitle, editBox);
-
-                    const rowElms = form.getElementsByTagName("table").item(0)
-                        .getElementsByTagName("tr");
-
-                    for (let i = rowElms.length - 1; i >= 0; i--) {
-                        let rowElm = rowElms.item(i);
-                        if (ndtype == "form" && !rowElm.classList.contains("row_form")
-                            || ndtype == "input" && !rowElm.classList.contains("row_input")
-                            || ndtype == "url" && !rowElm.classList.contains("row_url")) {
-                            rowElm.parentNode.removeChild(rowElm);
-                        }
-                    }
-
-                    if (ndtype == "form") {
-                        editBoxTitle.textContent = "Edit form element";
-                        form.i_method.value = editArgs.method ? editArgs.method.toLowerCase() : "get";
-                        form.i_enctype.value = editArgs.enctype;
-                        form.i_target.value = editArgs.target;
-                        form.i_action.value = editArgs.action;
-                        form.i_action.onkeydown = enterToSubmit;
-                    }
-                    else if (ndtype == "input") {
-                        editBoxTitle.textContent = "Edit form control element";
-                        form.i_disabled.checked = editArgs.disabled;
-                        form.i_name.value = editArgs.name;
-                        form.i_value.value = editArgs.value;
-                        form.i_multiline.parentElement.style.display = 'inline';
-                        form.i_multiline.checked = editArgs.value.indexOf("\n") > -1;
-                        form.i_value.onkeydown = (ev) => {
-                            if (!form.i_multiline.checked) {
-                                enterToSubmit(ev);
-                            }
-                        };
-                    }
-                    else {
-                        editBoxTitle.textContent = "Edit URL attribute";
-                        form.i_url.value = editArgs.url;
-                        form.i_url.onkeydown = enterToSubmit;
-                    }
-
-                    const autoFocus = form.getElementsByClassName("autofocus")[0];
-
-                    if (autoFocus) {
-                        autoFocus.focus();
-                        autoFocus.setSelectionRange(0, 0);
-                    }
+                    ifrmOnLoad(ev);
                 }
                 catch (err) {
                     console.error(err);
                 }
             };
 
-            ifrm.srcdoc = html;
+            ifrm.src = browser.extension.getURL("/content/edit_box.html");;
         };
         self.finishNodeEdit = function(msg) {
             var ndtype = msg.ndtype;

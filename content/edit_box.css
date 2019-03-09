@@ -1,0 +1,82 @@
+body {
+    margin: 0;
+    padding: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    position: fixed;
+    background-color: #FFF8;
+    font-size: 10pt;
+    font-family: arial, sans-serif;
+    user-select: none;
+    -moz-user-select: none;
+}
+
+div#edit_box {
+    background: #F0F0F0;
+    border: 1px outset lightblue;
+    width: 490px;
+    padding: 0;
+    box-shadow: 5px 5px 10px 5px rgba(0,0,0,0.3);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+p#edit_box_title {
+    margin: 0;
+    padding: 6px;
+    font-size: 10pt;
+    background: white;
+}
+
+form#edit_box_form {
+    width: 100%;
+    margin: 5px;
+}
+
+td.label {
+    width: 60px;
+}
+
+textarea.valField {
+    word-break: break-all;
+}
+
+textarea.valField, input.valField {
+    width: 400px;
+}
+
+.valField {
+    font-family: Consolas, Osaka-mono, "Courier New", monospace;
+    font-size: 9pt;
+}
+
+table#main {
+    width: 100%;
+    margin: 10px;
+}
+
+select.tmpSel {
+    position: absolute;
+    display: none;
+}
+
+div.wrapTmpSel {
+    position: relative;
+}
+
+p#btnPara {
+    text-align: center;
+    margin: 5px;
+}
+
+.btnMargin {
+    margin-left: 2rem;
+}
+
+input.btn {
+    padding: 1px 20px;
+}

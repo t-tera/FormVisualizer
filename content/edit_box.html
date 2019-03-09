@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="edit_box.css"/>
+</head>
+<body>
+<div id="edit_box">
+<p id="edit_box_title"></p>
+<form id="edit_box_form">
+<table class="main">
+    <!-- form -->
+    <tr class="row_form">
+    <td class="label">Method</td>
+    <td>
+    <label><input type="radio" name="i_method" value="get" checked>GET</label>
+    <label><input type="radio" name="i_method" value="post">POST</label>
+    </td>
+    </tr>
+
+    <tr class="row_form">
+    <td class="label">Enctype</td>
+    <td>
+    <input type="text" name="i_enctype" class="valField"><br>
+    <div class="wrapTmpSel">
+    <select name="i_enctype_sel" size="4" class="tmpSel valField">
+    <option value="">--</option>
+    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+    <option value="multipart/form-data">multipart/form-data</option>
+    <option value="text/plain">text/plain</option>
+    </select>
+    </div>
+    </td>
+    </tr>
+
+    <tr class="row_form">
+    <td class="label">Target</td>
+    <td>
+    <input type="text" name="i_target" class="valField"><br>
+    <div class="wrapTmpSel">
+    <select name="i_target_sel" size="5" class="tmpSel valField">
+    <option value="">--</option>
+    <option value="_blank">_blank</option>
+    <option value="_self">_self</option>
+    <option value="_top">_top</option>
+    <option value="_parent">_parent</option>
+    </select>
+    </div>
+    </td>
+    </tr>
+
+    <tr class="row_form">
+    <td class="label">Action</td>
+    <td>
+    <textarea name="i_action" rows="4" class="autofocus valField"></textarea>
+    </td>
+    </tr>
+
+    <!-- input -->
+    <tr class="row_input">
+    <td class="label"><label for="i_disabled">Disabled</label></td>
+    <td>
+    <input type="checkbox" name="i_disabled" id="i_disabled">
+    </td>
+    </tr>
+
+    <tr class="row_input">
+    <td class="label">Name</td>
+    <td>
+    <input type="text" name="i_name" value="" class="valField">
+    </td>
+    </tr>
+
+    <tr class="row_input">
+    <td class="label">Value</td>
+    <td>
+    <textarea name="i_value" rows="4" class="autofocus valField"></textarea>
+    </td>
+    </tr>
+
+    <!-- url -->
+    <tr class="row_url">
+    <td class="label">URL</td>
+    <td>
+    <textarea name="i_url" rows="5" class="autofocus valField"></textarea>
+    </td>
+    </tr>
+
+    </table>
+
+    <p id="btnPara">
+    <input type="submit" value="OK" class="btn">
+    <input type="button" value="Cancel" name="i_cancelBtn" class="btn btnMargin">
+    <label style="display: none"><input type="checkbox" name="i_multiline" class="btnMargin">multiline</label>
+    </p>
+</form>
+</div><!-- /#edit_box -->
+</body>
+</html>

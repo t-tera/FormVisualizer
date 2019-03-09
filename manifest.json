@@ -2,13 +2,13 @@
   "description": "A small Firefox extension for web app security testers. It allows visualizing (and manipulating) form elements and removing all cookies with a single action.",
   "manifest_version": 2,
   "name": "FormVisualizer",
-  "version": "1.1.1",
-  "homepage_url": "https://www.mbsd.jp/",
+  "version": "1.1.2",
+  "homepage_url": "https://github.com/t-tera/FormVisualizer",
   "icons": {
     "48": "icons/icon.svg"
   },
 
-  "permissions": ["cookies","<all_urls>","activeTab", "storage", "browsingData", "contextualIdentities", "privacy", "menus"],
+  "permissions": ["cookies","<all_urls>","menus"],
 
   "browser_action": {
     "default_icon": "icons/icon.svg",
