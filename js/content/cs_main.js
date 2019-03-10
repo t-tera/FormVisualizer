@@ -60,15 +60,19 @@
             self.setStatFlg(newstat);
             self.toggleVisualizer(newstat);
         };
+
         self.getCurrentStat = function() {
             return window[NAME_PREFIX].stat;
         };
+
         self.setStatFlg = function(newstat) {
             window[NAME_PREFIX].stat = newstat;
         };
+
         self.toggleVisualizer = function(s) {
             s ? self.visualizerDocOn() : self.visualizerDocOff();
         };
+
         self.nl2Arr = function(nd) {
             var arr = new Array();
             for (i = 0, ndlen = nd.length; i < ndlen; i++) {
@@ -76,6 +80,7 @@
             }
             return arr;
         };
+
         self.visualizerDocOn = function() {
             var iarr = new Array();
             iarr = iarr.concat(self.nl2Arr(self.getElms('input')));
@@ -103,6 +108,7 @@
             self.borderSet(farr, '3px dotted #F00');
             self.borderSet(ifarr, '3px dotted #00F');
         };
+
         self.visualizerDocOff = function() {
             var d = document;
             var spans = d.getElementsByClassName('cls' + NAME_PREFIX);
@@ -115,6 +121,7 @@
             self.borderUnSet(self.getElms('form'));
             self.borderUnSet(self.getElms('iframe'));
         };
+
         self.getChildNodes = function(span) {
             var d = document;
             var n = span.relatedNode;
@@ -123,6 +130,7 @@
             return self.exist(editArgs.txt)
                 ? [d.createTextNode(editArgs.txt)] : self.getElmLabelNodes(n);
         };
+
         self.getNDInfo = function(n, o) {
             var d = document;
             var tag = n ? self.getTagName(n) : null;
@@ -189,6 +197,7 @@
             }
             return null;
         };
+
         self.visualizeNode = function(n, o) {
             var d = document;
             var ndInfo = self.getNDInfo(n, o);
@@ -288,26 +297,31 @@
 
             return span;
         };
+
         self.visualizeNodeBySpan = function(span) {
             var n = span.relatedNode;
             span.parentNode.removeChild(span);
             self.visualizeNode(n);
         };
+
         self.borderUnSet = function(nds) {
             for (var i = 0, ndlen = nds.length; i < ndlen; i++) {
                 nds[i].style.border = nds[i].borderStyleBackup;
                 nds[i].borderStyleBackup = undefined;
             }
         };
+
         self.borderSet = function(nds, borderstyle) {
             for (var i = 0, ndlen=nds.length; i < ndlen; i++) {
                 nds[i].borderStyleBackup = nds[i].style.border;
                 nds[i].style.border = borderstyle;
             }
         };
+
         self.getElms = function(t) {
             return document.getElementsByTagName(t);
         };
+
         self.getTagName = function(n) {
             try {
                 if (n instanceof HTMLFormElement) {
@@ -320,10 +334,12 @@
             }
             return null;
         };
+
         self.getFormAction = function(nd) {
             var u = typeof(nd.action) == "string" ? nd.action : nd.getAttribute('action');
             return self.getAbsUrl(u, nd.ownerDocument);
         };
+
         self.getAbsUrl = function(u, d) {
             if (u.indexOf('http:') == 0 || u.indexOf('https:') == 0) {
                 return u;
@@ -332,14 +348,17 @@
             a.href = u;
             return a.href;
         };
+
         self.getMethod = function(n) {
             var mt = typeof(n.method) == "string" ? n.method : n.getAttribute('method');
             return self.exist(mt) && mt.length > 0 ? mt.toLowerCase() : 'get';
         };
+
         self.getFormAttr = function(n, attr) {
             var at = typeof(n[attr]) == "string" ? n[attr] : n.getAttribute(attr);
             return self.exist(at) && at.length > 0 ? at : '';
         };
+
         self.getObjUrl = function(n) {
             var tag = self.getTagName(n);
             if (tag == 'object') {
@@ -356,6 +375,7 @@
                 return n.src;
             }
         };
+
         self.setObjUrl = function(n, url) {
             var tag = self.getTagName(n);
             if (tag == 'object') {
@@ -376,6 +396,7 @@
                 n.src = url;
             }
         };
+
         self.getElmLabelNodes = function(n) {
             var d = document;
             var dl = '\u2503';
@@ -415,6 +436,7 @@
             }
             return [];
         };
+
         self.openEditWin = function(span) {
             var rnode = span.relatedNode;
             var tag = self.getTagName(rnode);
@@ -432,24 +454,29 @@
                 ndtype: span.ndtype
             });
         };
+
         self.openEditWinByNode = function(n) {
             var span = self.visualizeNode(n);
             self.openEditWin(span);
         };
+
         self.removeAllChildren = function(n) {
             while (n.lastChild) {
                 n.removeChild(n.lastChild);
             }
         };
+
         self.setChildNodes = function(par, nds) {
             self.removeAllChildren(par);
             for (var i = 0; i < nds.length; i++) {
                 par.appendChild(nds[i]);
             }
         };
+
         self.exist = function(s) {
             return s != undefined && s != null;
         };
+
         self.shorten = function(s) {
             if (!self.exist(s)) {return '';}
 
@@ -458,10 +485,12 @@
             return (s.length > maxlen + snipmark.length)
                 ? s.substr(0, maxlen / 2 - 1) + snipmark + s.substr(-maxlen / 2 + 1) : s;
         };
+
         self.shortenInputType = function(type) {
             const map = {checkbox: "check"};
             return self.exist(map[type]) ? map[type] : type;
         };
+
         self.openNodeEditDialog = function(msg) {
             const ndtype = msg.ndtype;
             const span = document.getElementById(msg.spanId);
@@ -500,6 +529,10 @@
                     const toDisp = selElm.style.display != 'inline-block';
                     hideTmpSel();
                     selElm.style.display = toDisp ? 'inline-block' : 'none';
+
+                    if (toDisp) {
+                        selElm.value = txtElm.value;
+                    }
                 };
                 txtElm.onchange = (ev) => {hideTmpSel()};
                 selElm.onclick = (ev) => {
