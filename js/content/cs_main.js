@@ -60,18 +60,17 @@
     const FormVisualizer = () => {
         var self = FormVisualizer;
 
-        self.tglVisualize = function() {
-            var newstat = !self.getCurrentStat();
-            self.setStatFlg(newstat);
-            self.toggleVisualizer(newstat);
+        self.tglVisualize = function(newStat) {
+            self.setStatFlg(newStat);
+            self.toggleVisualizer(newStat);
         };
 
         self.getCurrentStat = function() {
             return window[NAME_PREFIX].stat;
         };
 
-        self.setStatFlg = function(newstat) {
-            window[NAME_PREFIX].stat = newstat;
+        self.setStatFlg = function(newStat) {
+            window[NAME_PREFIX].stat = newStat;
         };
 
         self.toggleVisualizer = function(s) {
@@ -733,14 +732,21 @@
     FormVisualizer();
 
     browser.runtime.onMessage.addListener((msg) => {
+        const isSelfTop = window.top === window;
+
         if (msg.command === "form-visualizer.flash-tab") {
             flashTab();
         }
+        else if (msg.command === "form-visualizer.get-visualize-stat") {
+            if (isSelfTop) {
+                return Promise.resolve({stat: FormVisualizer.getCurrentStat()});
+            }
+        }
         else if (msg.command === "form-visualizer.tgl-visualize-form") {
-            FormVisualizer.tglVisualize();
+            FormVisualizer.tglVisualize(msg.opts.newStat);
         }
         else if (msg.command === "form-visualizer.open-node-edit") {
-            if (window.top === window) {
+            if (isSelfTop) {
                 FormVisualizer.openNodeEditDialog(msg);
             }
         }
@@ -748,8 +754,15 @@
             FormVisualizer.finishNodeEdit(msg);
         }
         else if (msg.command === "form-visualizer.edit-link") {
-            const n = browser.menus.getTargetElement(msg.opts.targetElmentId);
-            FormVisualizer.openEditWinByNode(n);
+            let n = browser.menus.getTargetElement(msg.opts.targetElementId);
+
+            do {
+                if (n.tagName === "A") {
+                    FormVisualizer.openEditWinByNode(n);
+                    return;
+                }
+            }
+            while (n = n.parentElement);
         }
     });
 })();

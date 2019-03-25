@@ -15,7 +15,7 @@ browser.menus.create({
 
 browser.menus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "form-visualizer.edit-link") {
-        sendCmdToTab(info.menuItemId, {"targetElmentId": info.targetElementId});
+        sendCmdToTab(info.menuItemId, {"targetElementId": info.targetElementId});
     }
 });
 
