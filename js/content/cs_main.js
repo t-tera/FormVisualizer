@@ -35,6 +35,11 @@
                 return true;
             }
 
+            if (ev.clientX < 0 || ev.clientX > window.innerWidth
+                || ev.clientY < 0 || ev.clientY > window.innerHeight) {
+                return false;
+            }
+
             var elm = self.moveElm;
             elm.style.left = (ev.clientX + elm.myOffset.x) + 'px';
             elm.style.top  = (ev.clientY + elm.myOffset.y) + 'px';
@@ -138,7 +143,7 @@
             if (["input", "select", "option", "textarea"].indexOf(tag) > -1) {
                 return {node: n,
                         ndtype: 'input',
-                        editArgs: {},
+                        editArgs: {name: n.name, value: n.value, disabled: n.disabled},
                         color: tag == 'option' ? 'greenyellow' : 'yellow',
                         editable: tag != 'option' && self.exist(n.name),
                         pos: tag == 'option' ? 2 : 1};
@@ -146,7 +151,7 @@
             else if (["form"].indexOf(tag) > -1) {
                 return {node: n,
                         ndtype: 'form',
-                        editArgs: {},
+                        editArgs: {method: n.method, enctype: n.enctype, target: n.target, action: n.action},
                         color: '#f9c',
                         editable: true,
                         pos: 0};
@@ -493,8 +498,6 @@
 
         self.openNodeEditDialog = function(msg) {
             const ndtype = msg.ndtype;
-            const span = document.getElementById(msg.spanId);
-            const rnode = span.relatedNode;
             const editArgs = msg.editArgs;
 
             const ifrm = document.createElement('iframe');
@@ -617,19 +620,19 @@
 
                 if (ndtype == "form") {
                     editBoxTitle.textContent = "Edit form element";
-                    form.i_method.value = rnode.method ? rnode.method.toLowerCase() : "get";
-                    form.i_enctype.value = rnode.enctype;
-                    form.i_target.value = rnode.target;
-                    form.i_action.value = rnode.action;
+                    form.i_method.value = editArgs.method ? editArgs.method.toLowerCase() : "get";
+                    form.i_enctype.value = editArgs.enctype;
+                    form.i_target.value = editArgs.target;
+                    form.i_action.value = editArgs.action;
                     form.i_action.onkeydown = enterToSubmit;
                 }
                 else if (ndtype == "input") {
                     editBoxTitle.textContent = "Edit form control element";
-                    form.i_disabled.checked = rnode.disabled;
-                    form.i_name.value = rnode.name;
-                    form.i_value.value = rnode.value;
+                    form.i_disabled.checked = editArgs.disabled;
+                    form.i_name.value = editArgs.name;
+                    form.i_value.value = editArgs.value;
                     form.i_multiline.parentElement.style.display = 'inline';
-                    form.i_multiline.checked = rnode.value.indexOf("\n") > -1;
+                    form.i_multiline.checked = editArgs.value.indexOf("\n") > -1;
                     form.i_value.onkeydown = (ev) => {
                         if (!form.i_multiline.checked) {
                             enterToSubmit(ev);

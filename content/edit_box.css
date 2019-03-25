@@ -5,6 +5,7 @@ body {
     bottom: 0;
     right: 0;
     left: 0;
+    position: fixed;
     background-color: #FFF8;
     font-size: 10pt;
     font-family: arial, sans-serif;
@@ -36,7 +37,8 @@ form#edit_box_form {
 }
 
 td.label {
-    width: 60px;
+    padding-right: 5px;
+    text-align: right;
 }
 
 textarea.valField {
@@ -45,6 +47,7 @@ textarea.valField {
 }
 
 textarea.valField, input.valField {
+    padding: 2px 4px;
     width: 450px;
 }
 
