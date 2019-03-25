@@ -114,7 +114,7 @@
             var spans = d.getElementsByClassName('cls' + NAME_PREFIX);
             for (var i = spans.length - 1; i >= 0; i--) {
                 var n = spans.item(i);
-                if (n.tagName == 'SPAN' || n.tagName == 'DIV') {
+                if (n.tagName == 'SPAN' || n.tagName == 'DIV' || n.tagName == 'IFRAME') {
                     n.parentNode.removeChild(n);
                 }
             }

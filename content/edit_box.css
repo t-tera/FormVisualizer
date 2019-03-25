@@ -5,7 +5,6 @@ body {
     bottom: 0;
     right: 0;
     left: 0;
-    position: fixed;
     background-color: #FFF8;
     font-size: 10pt;
     font-family: arial, sans-serif;
@@ -16,7 +15,6 @@ body {
 div#edit_box {
     background: #F0F0F0;
     border: 1px outset lightblue;
-    width: 490px;
     padding: 0;
     box-shadow: 5px 5px 10px 5px rgba(0,0,0,0.3);
     position: fixed;
@@ -43,10 +41,11 @@ td.label {
 
 textarea.valField {
     word-break: break-all;
+    resize: vertical;
 }
 
 textarea.valField, input.valField {
-    width: 400px;
+    width: 450px;
 }
 
 .valField {
@@ -55,8 +54,7 @@ textarea.valField, input.valField {
 }
 
 table#main {
-    width: 100%;
-    margin: 10px;
+    margin: 0;
 }
 
 select.tmpSel {
