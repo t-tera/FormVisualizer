@@ -2,7 +2,7 @@
   "description": "A small Firefox extension for web app security testers. It allows visualizing (and manipulating) form elements and removing all cookies with a single action.",
   "manifest_version": 2,
   "name": "FormVisualizer",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "homepage_url": "https://github.com/t-tera/FormVisualizer",
   "icons": {
     "48": "icons/icon.svg"
@@ -18,7 +18,7 @@
 
   "content_scripts": [
     {"matches": ["*://*/*"],
-	 "js": ["js/content/cs_main.js"],
+     "js": ["js/content/cs_main.js"],
      "all_frames": true}
   ],
 
@@ -30,15 +30,24 @@
 
   "commands": {
     "form-visualizer.clear-cookies": {
-      "suggested_key": {"default": "Alt+Ctrl+D"},
+      "suggested_key": {
+        "default": "Alt+Ctrl+D",
+        "mac": "Alt+MacCtrl+D"
+      },
       "description": "Clear all cookies"
     },
     "form-visualizer.tgl-visualize-form": {
-      "suggested_key": {"default": "Alt+Ctrl+F"},
+      "suggested_key": {
+        "default": "Alt+Ctrl+F",
+        "mac": "Alt+MacCtrl+F"
+      },
       "description": "Visualize form"
     },
     "form-visualizer.show-source": {
-      "suggested_key": {"default": "Alt+Ctrl+S"},
+      "suggested_key": {
+        "default": "Alt+Ctrl+S",
+        "mac": "Alt+MacCtrl+S"
+      },
       "description": "Show source"
     }
   }

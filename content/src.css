@@ -14,9 +14,9 @@ a.hook {
 span.srcl:before {
     content: attr(ln);
     color: silver;
-	position: absolute;
+    position: absolute;
     left: -5em;
-	top: 0;
+    top: 0;
 }
 
 span.sptag {
@@ -24,16 +24,16 @@ span.sptag {
 }
 
 span.elm {
-	color: purple;
-	font-weight: bold;
+    color: purple;
+    font-weight: bold;
 }
 
 span.atn {
-	font-weight: bold;
+    font-weight: bold;
 }
 
 span.atv {
-	color: blue;
+    color: blue;
 }
 
 span.err {
