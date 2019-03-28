@@ -5,6 +5,9 @@ browser.commands.onCommand.addListener((command) => {
     if (command == "form-visualizer.tgl-visualize-form") {
         tglVisualizeForm();
     }
+    if (command == "form-visualizer.show-source") {
+        showSource();
+    }
 });
 
 browser.menus.create({

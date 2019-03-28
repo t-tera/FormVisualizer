@@ -764,5 +764,10 @@
             }
             while (n = n.parentElement);
         }
+        else if (msg.command === "form-visualizer.get-source") {
+            if (isSelfTop) {
+                return Promise.resolve({source: document.documentElement.outerHTML});
+            }
+        }
     });
 })();

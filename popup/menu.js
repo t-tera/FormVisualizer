@@ -1,12 +1,20 @@
-const listenForClicks = () => {
+(() => {
     document.addEventListener("click", (e) => {
-        if (e.target.id === "formVisualizeBtn") {
-            tglVisualizeForm().then(() => {window.close()});
+        const id = e.target.id;
+        let prom = null;
+
+        if (id === "formVisualizeBtn") {
+            prom = tglVisualizeForm;
         }
-        else if (e.target.id === "clearCookiesBtn") {
-            clearCookies().then(() => {window.close()});
+        else if (id === "clearCookiesBtn") {
+            prom = clearCookies;
+        }
+        else if (id === "showSourceBtn") {
+            prom = showSource;
+        }
+
+        if (prom) {
+            prom().then(() => {window.close()});
         }
     });
-}
-
-listenForClicks();
+})();

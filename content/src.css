@@ -1,0 +1,42 @@
+body {
+    font-family: Consolas, Osaka-mono, 'Courier New', monospace;
+    word-break: break-all;
+    white-space: pre-wrap;
+    font-size: 11pt;
+    margin-left: 5em;
+}
+
+a.hook {
+    position: relative;
+    border: 1px solid transparent;
+}
+
+span.srcl:before {
+    content: attr(ln);
+    color: silver;
+	position: absolute;
+    left: -5em;
+	top: 0;
+}
+
+span.sptag {
+    color: green;
+}
+
+span.elm {
+	color: purple;
+	font-weight: bold;
+}
+
+span.atn {
+	font-weight: bold;
+}
+
+span.atv {
+	color: blue;
+}
+
+span.err {
+    color: red;
+    font-weight: bold;
+}
