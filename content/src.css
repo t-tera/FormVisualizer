@@ -2,21 +2,31 @@ body {
     font-family: Consolas, Osaka-mono, 'Courier New', monospace;
     word-break: break-all;
     white-space: pre-wrap;
-    font-size: 11pt;
-    margin-left: 5em;
+    font-size: 10pt;
+    background: whitesmoke;
+	margin: 0;
+	padding: 0;
 }
 
-a.hook {
+div.src {
+	padding: 0.8em 0.4em 0.8em 0.4em;
+    margin-left: 4.5em;
+    background: white;
+    border-left: 1px solid darkgray;
+}
+
+span.hook {
     position: relative;
-    border: 1px solid transparent;
+	/* Dummy. We need it to properly position line num */
+	border-left: 1px solid transparent;
+	margin-left: -1px;
 }
 
 span.srcl:before {
     content: attr(ln);
-    color: silver;
+    color: darkgray;
     position: absolute;
-    left: -5em;
-    top: 0;
+    left: -4.5em;
 }
 
 span.sptag {

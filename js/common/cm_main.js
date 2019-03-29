@@ -34,13 +34,17 @@ const showSource = () => {
     return new Promise((resolve, reject) => {
         sendCmdToTab("form-visualizer.get-source").then((response) => {
             const hilit = wrapHilitHTML(response.source);
+            const title = response.title || response.url;
             const cssUrl = browser.extension.getURL("/content/src.css");
-            const source = '<html><head><link rel="stylesheet" href="' + h(cssUrl) + '"></head><body style="">' + hilit + '</body></html>';
+            const source = '<html><head>'
+                + '<link rel="stylesheet" href="' + h3(cssUrl) + '">'
+                + '<title>Src - ' + h2(title) + '</title></head>'
+                + '<body>' + hilit + '</body></html>';
             const blob = new Blob([source], {type: "text/html"});
-            const url = URL.createObjectURL(blob);
+            const blobUrl = URL.createObjectURL(blob);
 
-            browser.tabs.create({url}).then(() => {
-                URL.revokeObjectURL(url);
+            browser.tabs.create({url: blobUrl, index: response.index + 1}).then(() => {
+                URL.revokeObjectURL(blobUrl);
                 resolve();
             });
         });
@@ -50,19 +54,31 @@ const showSource = () => {
 const sendCmdToTab = (command, opts) => {
     return new Promise((resolve, reject) => {
         browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-            browser.tabs.sendMessage(tabs[0].id, {command, opts}).then((response) => {resolve(response)});
+            browser.tabs.sendMessage(tabs[0].id, {command, opts}).then((response) => {
+                response.index = tabs[0].index;
+                resolve(response);
+            });
         });
     });
 };
 
 const h = (s) => {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\x27/g, '&#39;');
+    return s.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\x22/g, '&quot;')
+        .replace(/\x27/g, '&#39;');
 };
 
 const h2 = (s) => {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 };
 
+const h3 = (s) => {
+    return s.replace(/&/g, '&amp;').replace(/\x22/g, '&quot;');
+};
+
+// The input could be an XML doc
 const hilitHTML = (html) => {
     let pos = 0, mode = 0, lastOPTag = null;
     let prevPos = -1, prevMode = -1, prevLastOPTag = -1;
@@ -71,20 +87,23 @@ const hilitHTML = (html) => {
     const hlen = html.length;
 
     const spn = (s, cls) => {
-        return "<span class=\"" + h(cls) + "\">" + h2(s) + "</span>";
+        return "<span class=\"" + h3(cls) + "\">" + h2(s) + "</span>";
     };
 
     const fixIdx = (n) => {
         return n === -1 ? hlen : n;
     };
 
-    const tagRegex = new RegExp("^[^\\s/>]+");
+    const tagRegex = new RegExp("^[^\\s\\d/<>][^\\s/<>]*");
 
     while (pos < hlen) {
         // Avoid getting stuck by infinite loop bugs
         if (prevPos === pos && prevMode === mode && prevLastOPTag === lastOPTag) {
-            ret += "\n" + spn("!ERROR! pos=" + pos + ", mode=" + mode + ", lastOPTag=" + (lastOPTag ? 1 : 0), "err");
-            break;
+            console.log("!ERROR! pos=" + pos + ", mode=" + mode + ", lastOPTag=" + lastOPTag);
+            ret += spn(html.charAt(pos), "unk");
+            pos += 1;
+            mode = 0;
+            lastOPTag = null;
         }
 
         prevPos = pos;
@@ -95,7 +114,7 @@ const hilitHTML = (html) => {
         if (mode === 0) {
             let endPos = null, cl = null;
 
-            if (lastOPTag === "script" || lastOPTag === "style") {
+            if (["script", "style"].includes(lastOPTag)) {
                 endPos = fixIdx(html.indexOf("</" + lastOPTag + ">", pos));
                 lastOPTag = null;
             }
@@ -111,8 +130,10 @@ const hilitHTML = (html) => {
                 endPos = fixIdx(html.indexOf("<", pos));
             }
 
-            ret += spn(html.substring(pos, endPos), "txt");
-            pos = endPos;
+            if (endPos > pos) {
+                ret += spn(html.substring(pos, endPos), "txt");
+                pos = endPos;
+            }
             continue;
         }
         else if (mode === 10) {
@@ -143,9 +164,8 @@ const hilitHTML = (html) => {
             let mt = tag.match(tagRegex);
 
             if (mt === null) {
-                let endPos = fixIdx(html.indexOf(">", pos)) + 1;
-                ret += spn(html.substring(pos, endPos), "unk");
-                pos = endPos;
+                ret += spn(html.substr(pos, ofst), "unk");
+                pos += ofst;
                 mode = 0;
                 continue;
             }
@@ -184,34 +204,43 @@ const hilitHTML = (html) => {
                 continue;
             }
 
-            mt = stl.match(/^([^=]+)=/);
+            mt = stl.match(/^[^=>\s]+/);
 
             if (mt === null) {
                 let endPos = fixIdx(html.indexOf(">", pos));
-                ret += spn(html.substring(pos, endPos), "unk");
+                ret += spn(html.substring(pos, endPos + 1), "unk");
                 pos = endPos + 1;
                 mode = 0;
                 continue;
             }
 
-            ret += spn(mt[1], "atn");
-            ret += "=";
+            ret += spn(mt[0], "atn");
             pos += mt[0].length;
 
             stl = stl.substring(mt[0].length);
+            mt = stl.match(/^\s*=\s*/);
 
-            let attrEndPos = null;
-
-            if (stl.length > 1 && stl.startsWith('"')
-                && (attrEndPos = stl.indexOf('"', 1)) !== -1) {
-                ret += spn(stl.substring(0, attrEndPos + 1), "atv");
-                pos += attrEndPos + 1;
+            if (mt === null) {
+                continue;
             }
             else {
-                let endPos = fixIdx(html.indexOf(">", pos));
-                ret += spn(html.substring(pos, endPos), "unk");
-                pos = endPos + 1;
-                mode = 0;
+                ret += mt[0];
+                pos += mt[0].length;
+            }
+
+            stl = stl.substring(mt[0].length);
+            let quot = stl.startsWith('"') ? '"' : (stl.startsWith("'") ? "'" : null);
+
+            if (quot) {
+                let endPos = fixIdx(stl.indexOf(quot, 1));
+                ret += spn(stl.substring(0, endPos + 1), "atv");
+                pos += endPos + 1;
+            }
+            else {
+                mt = stl.match(/^[^\s>]*/);
+                let endPos = mt[0].length;
+                ret += spn(stl.substring(0, endPos), "atv");
+                pos += endPos;
             }
             continue;
         }
@@ -227,7 +256,7 @@ const wrapHilitHTML = (html) => {
     lines.forEach((l, idx) => {
         let lnum = "" + (idx + 1);
         lnum = " ".repeat(7 - lnum.length) + lnum;
-        ret += '<a class="hook"><span ln="' + lnum + '" class="srcl"></span></a>' + l + "\n";
+        ret += '<span class="hook"><span ln="' + lnum + '" class="srcl"></span></span>' + l + "\n";
     });
     return '<div class="src">' + ret + '</div>';
 };

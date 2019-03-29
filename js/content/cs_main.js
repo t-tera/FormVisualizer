@@ -766,7 +766,12 @@
         }
         else if (msg.command === "form-visualizer.get-source") {
             if (isSelfTop) {
-                return Promise.resolve({source: document.documentElement.outerHTML});
+                let ret = {
+                    url: window.location.href,
+                    title: document.title,
+                    source: document.documentElement.outerHTML,
+                };
+                return Promise.resolve(ret);
             }
         }
     });
