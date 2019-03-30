@@ -1,14 +1,14 @@
 {
-  "description": "A small Firefox extension for web app security testers. It allows visualizing (and manipulating) form elements and removing all cookies with a single action.",
+  "description": "A small Firefox extension for web app security testers (aka. pentesters). It allows visualizing and manipulating form elements and clearing cookies and local storage data with a single action.",
   "manifest_version": 2,
   "name": "FormVisualizer",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "homepage_url": "https://github.com/t-tera/FormVisualizer",
   "icons": {
     "48": "icons/icon.svg"
   },
 
-  "permissions": ["cookies","<all_urls>","menus"],
+  "permissions": ["<all_urls>","menus","browsingData"],
 
   "browser_action": {
     "default_icon": "icons/icon.svg",
@@ -34,7 +34,7 @@
         "default": "Alt+Ctrl+D",
         "mac": "Alt+MacCtrl+D"
       },
-      "description": "Clear all cookies"
+      "description": "Clear cookies and storage data"
     },
     "form-visualizer.tgl-visualize-form": {
       "suggested_key": {

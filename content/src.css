@@ -10,12 +10,12 @@ body {
 
 div.src {
 	padding: 0.8em 0.4em 0.8em 0.4em;
-    margin-left: 4.5em;
+    margin-left: 3.5em;
     background: white;
     border-left: 1px solid darkgray;
 }
 
-span.hook {
+a.hook {
     position: relative;
 	/* Dummy. We need it to properly position line num */
 	border-left: 1px solid transparent;
@@ -26,7 +26,8 @@ span.srcl:before {
     content: attr(ln);
     color: darkgray;
     position: absolute;
-    left: -4.5em;
+	right: 0.75em;
+    white-space: nowrap;
 }
 
 span.sptag {

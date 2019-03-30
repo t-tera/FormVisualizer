@@ -770,6 +770,7 @@
                     url: window.location.href,
                     title: document.title,
                     source: document.documentElement.outerHTML,
+                    baseURI: document.baseURI,
                 };
                 return Promise.resolve(ret);
             }
