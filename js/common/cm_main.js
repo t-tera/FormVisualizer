@@ -99,8 +99,7 @@ const hilitHTML = (html) => {
         if (s.indexOf("&") === -1) {
             return s;
         }
-        s = s.replace(/</g, '&lt;');
-        dummyElm.innerHTML = s;
+        dummyElm.innerHTML = s.replace(/</g, '&lt;');
         return dummyElm.textContent;
     };
 

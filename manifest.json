@@ -2,7 +2,7 @@
   "description": "A small Firefox extension for web app security testers (aka. pentesters). It allows visualizing and manipulating form elements and clearing cookies and local storage data with a single action.",
   "manifest_version": 2,
   "name": "FormVisualizer",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "homepage_url": "https://github.com/t-tera/FormVisualizer",
   "icons": {
     "48": "icons/icon.svg"
