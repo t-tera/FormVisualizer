@@ -34,7 +34,7 @@ const showSource = () => {
                 + '<link rel="stylesheet" href="' + h(cssUrl) + '">'
                 + '<title>Src - ' + h(title) + '</title></head>'
                 + '<body>' + hilit + '</body></html>';
-            const blob = new Blob([source], {type: "text/html"});
+            const blob = new Blob([source], {type: "text/html; charset=UTF-8"});
             const blobUrl = URL.createObjectURL(blob);
 
             browser.tabs.create({url: blobUrl, index: response.index + 1}).then(() => {
