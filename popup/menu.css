@@ -1,11 +1,21 @@
 h1 {
-   text-align: center;
-   margin: 0.4rem 0;
-   font-size: 16pt;
+    text-align: center;
+    margin: 0.4rem 0;
+    font-size: 16pt;
+}
+
+h2 {
+    text-align: center;
+    margin: 0.2rem 0;
+    font-size: 13pt;
 }
 
 button.menu_btn {
     width: 100%;
-    font-size: 14pt;
+    font-size: 12pt;
     margin: 0.4em 0;
+}
+
+div#setting-div {
+    font-size: 10pt;
 }

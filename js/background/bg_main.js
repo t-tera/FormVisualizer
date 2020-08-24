@@ -1,3 +1,33 @@
+window.bgGlobals = {respStatusBuf: {}, showResponseStatusConfig: true};
+
+browser.webRequest.onHeadersReceived.addListener(
+    function(details) {
+        if (details.frameId !== 0 || details.type !== "main_frame") {
+            return;
+        }
+
+        let key = `${details.tabId}_${details.requestId}`;
+        (bgGlobals.respStatusBuf[key] = bgGlobals.respStatusBuf[key] || []).push(details);
+    },
+    {urls: ["<all_urls>"]}
+);
+
+browser.webRequest.onCompleted.addListener(
+    function(details) {
+        if (details.frameId !== 0 || details.type !== "main_frame") {
+            return;
+        }
+
+        let key = `${details.tabId}_${details.requestId}`;
+
+        if (bgGlobals.showResponseStatusConfig) {
+            showResponseStatus(bgGlobals.respStatusBuf[key]);
+        }
+        delete bgGlobals.respStatusBuf[key];
+    },
+    {urls: ["<all_urls>"]}
+);
+
 browser.commands.onCommand.addListener((command) => {
     if (command == "form-visualizer.clear-cookies") {
         clearCookies();

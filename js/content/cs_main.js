@@ -775,5 +775,41 @@
                 return Promise.resolve(ret);
             }
         }
+        else if (msg.command === "form-visualizer.show-response-status") {
+            var statuses = [];
+
+            for (let details of msg.opts.detailsArr) {
+                var status = details.statusCode;
+                if (details.fromCache) {
+                    status = `(${status})`;
+                }
+                statuses.push(status);
+            }
+
+            var show = () => {
+                var animName = `fadeIn${NAME_PREFIX}`;
+                var style = document.createElement("style");
+                style.textContent = `@keyframes ${animName} {0% {background-color: steelblue}}`;
+                document.head.appendChild(style);
+                var span = document.createElement('span');
+                span.textContent = `Status: ${statuses.join(' -> ')}`;
+                span.style.cssText = 'position: fixed; right: 0; top: 0; background-color: purple; color: white;'
+                    + ` font-size: 10pt; padding: 0 3px; cursor: pointer; z-index: 2147483647; animation: ${animName} 7s ease;`;
+                span.title = 'Dismiss';
+                span.className = 'hogehoge';
+                document.documentElement.appendChild(span);
+                var remove = () => {document.documentElement.removeChild(span)};
+                setTimeout(remove, 20000);
+                span.addEventListener('click', remove, false);
+                console.log(span.textContent);
+            };
+
+            if (document.readyState == 'loading') {
+                document.addEventListener('DOMContentLoaded', show, false);
+            }
+            else {
+                show();
+            }
+        }
     });
 })();

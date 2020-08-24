@@ -11,7 +11,12 @@
   <div id="popup-content">
     <button class="menu_btn" id="formVisualizeBtn" title="Alt + Ctrl + F">Toggle form visualization</button><br>
     <button class="menu_btn" id="clearCookiesBtn" title="Alt + Ctrl + D">Clear cookies and storage data</button><br>
+    <button class="menu_btn" id="clearCacheBtn" title="(no keyboard shortcut)">Clear cache</button><br>
     <button class="menu_btn" id="showSourceBtn" title="Alt + Ctrl + S">Show DOM HTML source</button>
+    <h2>Settings</h2>
+    <div id="setting-div">
+    <label title="Only status codes of top-level navigations are displayed."><input type="checkbox" id="showResponseStatusChk">Show response status code in the top right corner</label>
+    </div>
   </div>
   <script src="/js/common/cm_main.js"></script>
   <script src="/popup/menu.js"></script>

@@ -22,6 +22,15 @@ const clearCookies = () => {
     });
 };
 
+const clearCache = () => {
+    return new Promise((resolve, reject) => {
+        browser.browsingData.removeCache({}).then(() => {
+            sendCmdToTab("form-visualizer.flash-tab");
+            resolve();
+        });
+    });
+}
+
 const showSource = () => {
     return new Promise((resolve, reject) => {
         sendCmdToTab("form-visualizer.get-source").then((response) => {
@@ -48,12 +57,15 @@ const showSource = () => {
 const sendCmdToTab = (command, opts) => {
     return new Promise((resolve, reject) => {
         browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
+            if (!tabs || tabs.length == 0) {
+                return reject(new Error('Tab not found'));
+            }
             browser.tabs.sendMessage(tabs[0].id, {command, opts}).then((response) => {
                 response = response || {};
                 response.index = tabs[0].index;
                 resolve(response);
-            });
-        });
+            }).catch(reject);
+        }).catch(reject);
     });
 };
 
@@ -304,4 +316,25 @@ const wrapHilitHTML = (html) => {
 
     const margin = 1 + ("" + lines.length).length * 0.5;
     return '<div class="src" style="margin-left: ' + margin + 'em">' + ret + '</div>';
+};
+
+const showResponseStatus = async (detailsArr) => {
+    let ok = false;
+    let wait = 100;
+
+    const doit = (wait) => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                sendCmdToTab("form-visualizer.show-response-status", {detailsArr}).then(resolve).catch(reject);
+            }, wait);
+        });
+    };
+
+    for (var i = 0; i <= 6; i++) {
+        try {
+            await doit(wait * i);
+            return;
+        }
+        catch (error) {}
+    }
 };
