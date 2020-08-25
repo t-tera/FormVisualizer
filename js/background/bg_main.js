@@ -1,31 +1,32 @@
-window.bgGlobals = {respStatusBuf: {}, showResponseStatusConfig: true};
+window.bgGlobals = {respWorkBuf: {}, showResponseStatusConfig: true};
 
 browser.webRequest.onHeadersReceived.addListener(
-    function(details) {
-        if (details.frameId !== 0 || details.type !== "main_frame") {
+    (details) => {
+        if (details.frameId !== 0) {
             return;
         }
 
         let key = `${details.tabId}_${details.requestId}`;
-        (bgGlobals.respStatusBuf[key] = bgGlobals.respStatusBuf[key] || []).push(details);
+        (bgGlobals.respWorkBuf[key] = bgGlobals.respWorkBuf[key] || []).push(details);
     },
-    {urls: ["<all_urls>"]}
+    {types: ["main_frame"], urls: ["<all_urls>"]}
 );
 
 browser.webRequest.onCompleted.addListener(
-    function(details) {
-        if (details.frameId !== 0 || details.type !== "main_frame") {
+    (details) => {
+        if (details.frameId !== 0) {
             return;
         }
 
         let key = `${details.tabId}_${details.requestId}`;
 
         if (bgGlobals.showResponseStatusConfig) {
-            showResponseStatus(bgGlobals.respStatusBuf[key]);
+            showResponseStatus(details.tabId, bgGlobals.respWorkBuf[key]);
         }
-        delete bgGlobals.respStatusBuf[key];
+
+        delete bgGlobals.respWorkBuf[key];
     },
-    {urls: ["<all_urls>"]}
+    {types: ["main_frame"], urls: ["<all_urls>"]}
 );
 
 browser.commands.onCommand.addListener((command) => {

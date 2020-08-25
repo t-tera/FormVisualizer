@@ -1,72 +1,62 @@
-const tglVisualizeForm = () => {
-    return new Promise((resolve, reject) => {
-        sendCmdToTab("form-visualizer.get-visualize-stat").then((response) => {
-            const opts = {newStat: !response.stat};
-            sendCmdToTab("form-visualizer.tgl-visualize-form", opts).then(() => {
-                resolve(opts.newStat);
-            });
-        });
-    });
+const tglVisualizeForm = async () => {
+    let response = await sendCmdToTab("form-visualizer.get-visualize-stat");
+
+    const opts = {newStat: !response.stat};
+    await sendCmdToTab("form-visualizer.tgl-visualize-form", opts);
+    return opts.newStat;
 };
 
-const clearCookies = () => {
-    return new Promise((resolve, reject) => {
-        const promises = [];
-        promises.push(browser.browsingData.removeLocalStorage({}));
-        promises.push(browser.browsingData.removeCookies({}));
+const clearCookies = async () => {
+    const promises = [];
+    promises.push(browser.browsingData.removeLocalStorage({}));
+    promises.push(browser.browsingData.removeCookies({}));
 
-        Promise.all(promises).then(() => {
-            sendCmdToTab("form-visualizer.flash-tab");
-            resolve();
-        });
-    });
+    await Promise.all(promises);
+    sendCmdToTab("form-visualizer.flash-tab");
 };
 
-const clearCache = () => {
-    return new Promise((resolve, reject) => {
-        browser.browsingData.removeCache({}).then(() => {
-            sendCmdToTab("form-visualizer.flash-tab");
-            resolve();
-        });
-    });
-}
-
-const showSource = () => {
-    return new Promise((resolve, reject) => {
-        sendCmdToTab("form-visualizer.get-source").then((response) => {
-            const title = response.title || response.url;
-            const cssUrl = browser.extension.getURL("/content/src.css");
-            const baseURI = response.baseURI.match(/^https?:/) ? response.baseURI : '';
-            const hilit = wrapHilitHTML(response.source);
-            const source = '<html><head>'
-                + '<base href="' + h(baseURI) + '">'
-                + '<link rel="stylesheet" href="' + h(cssUrl) + '">'
-                + '<title>Src - ' + h(title) + '</title></head>'
-                + '<body>' + hilit + '</body></html>';
-            const blob = new Blob([source], {type: "text/html; charset=UTF-8"});
-            const blobUrl = URL.createObjectURL(blob);
-
-            browser.tabs.create({url: blobUrl, index: response.index + 1}).then(() => {
-                URL.revokeObjectURL(blobUrl);
-                resolve();
-            });
-        });
-    });
+const clearCache = async () => {
+    await browser.browsingData.removeCache({});
+    sendCmdToTab("form-visualizer.flash-tab");
 };
 
-const sendCmdToTab = (command, opts) => {
-    return new Promise((resolve, reject) => {
-        browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-            if (!tabs || tabs.length == 0) {
-                return reject(new Error('Tab not found'));
-            }
-            browser.tabs.sendMessage(tabs[0].id, {command, opts}).then((response) => {
-                response = response || {};
-                response.index = tabs[0].index;
-                resolve(response);
-            }).catch(reject);
-        }).catch(reject);
-    });
+const showSource = async () => {
+    let response = await sendCmdToTab("form-visualizer.get-source");
+
+    const title = response.title || response.url;
+    const cssUrl = browser.extension.getURL("/content/src.css");
+    const baseURI = response.baseURI.match(/^https?:/) ? response.baseURI : '';
+    const hilit = wrapHilitHTML(response.source);
+    const source = '<html><head>'
+        + '<base href="' + h(baseURI) + '">'
+        + '<link rel="stylesheet" href="' + h(cssUrl) + '">'
+        + '<title>Src - ' + h(title) + '</title></head>'
+        + '<body>' + hilit + '</body></html>';
+    const blob = new Blob([source], {type: "text/html; charset=UTF-8"});
+    const blobUrl = URL.createObjectURL(blob);
+
+    await browser.tabs.create({url: blobUrl, index: response.tabIndex + 1});
+    URL.revokeObjectURL(blobUrl);
+};
+
+const sendCmdToTab = async (command, opts) => {
+    let tabId = opts && opts.tabId;
+
+    if (tabId === undefined) {
+        const tabs = await browser.tabs.query({active: true, currentWindow: true});
+
+        if (!tabs || tabs.length == 0) {
+            throw new Error('Tab not found');
+        }
+
+        tabId = tabs[0].id;
+    }
+
+    let response = await browser.tabs.sendMessage(tabId, {command, opts});
+    response = response || {};
+    response.tabIndex = (await browser.tabs.get(tabId)).index;
+
+    return response;
 };
 
 const h = (s) => {
@@ -318,23 +308,13 @@ const wrapHilitHTML = (html) => {
     return '<div class="src" style="margin-left: ' + margin + 'em">' + ret + '</div>';
 };
 
-const showResponseStatus = async (detailsArr) => {
-    let ok = false;
-    let wait = 100;
-
-    const doit = (wait) => {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                sendCmdToTab("form-visualizer.show-response-status", {detailsArr}).then(resolve).catch(reject);
-            }, wait);
-        });
-    };
-
-    for (var i = 0; i <= 6; i++) {
-        try {
-            await doit(wait * i);
-            return;
+const showResponseStatus = (targetTabId, detailsArr) => {
+    browser.tabs.onUpdated.addListener(((detailsArr, targetTabId) => {
+        return function tempFunc(tabId, changeInfo) {
+            if (changeInfo.status === 'complete' && tabId === targetTabId) {
+                sendCmdToTab("form-visualizer.show-response-status", {detailsArr, tabId});
+                browser.tabs.onUpdated.removeListener(tempFunc);
+            }
         }
-        catch (error) {}
-    }
+    })(detailsArr, targetTabId));
 };
