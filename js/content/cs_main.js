@@ -835,7 +835,7 @@
 
                 let urlBase = details.url.split(/[#?]/)[0];
                 let urlRest = details.url.substring(urlBase.length);
-                let url = urlBase + (urlRest.length > 60 ? urlRest.substring(0, 60) + '\u2026' : urlRest);
+                let url = urlBase + (urlRest.length > 80 ? urlRest.substring(0, 80) + '\u2026' : urlRest);
                 cmsg += `${status} ${url}`;
             }
 

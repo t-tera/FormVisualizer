@@ -95,14 +95,14 @@ const hilitHTML = (html) => {
     // Lax regex
     const tagRegex = new RegExp("^[^\\s\\d/<>][^\\s/<>]*");
 
-    let dummyElm = document.createElement("span");
+    let domParser = new DOMParser();
 
     const unescapeHTML = (s) => {
         if (s.indexOf("&") === -1) {
             return s;
         }
-        dummyElm.innerHTML = s.replace(/</g, '&lt;');
-        return dummyElm.textContent;
+        s = s.replace(/</g, '&lt;');
+        return domParser.parseFromString(s, 'text/html').documentElement.textContent;
     };
 
     while (pos < hlen) {
