@@ -776,6 +776,7 @@
             }
         }
         else if (msg.command === "form-visualizer.show-response-status") {
+            if (window !== window.top) return;
             var statuses = [];
 
             for (let details of msg.opts.detailsArr) {
@@ -792,7 +793,7 @@
                 style.textContent = `@keyframes ${animName} {0% {background-color: steelblue}}`;
                 document.head.appendChild(style);
                 var span = document.createElement('span');
-                span.textContent = `Status: ${statuses.join(' -> ')}`;
+                span.textContent = `Status: ${statuses.join(' \u2192 ')}`;
                 span.style.cssText = 'position: fixed; right: 0; top: 0; background-color: purple; color: white;'
                     + ` font-size: 10pt; padding: 0 3px; cursor: pointer; z-index: 2147483647; animation: ${animName} 7s ease;`;
                 span.title = 'Dismiss';
@@ -801,7 +802,6 @@
                 var remove = () => {document.documentElement.removeChild(span)};
                 setTimeout(remove, 20000);
                 span.addEventListener('click', remove, false);
-                console.log(span.textContent);
             };
 
             if (document.readyState == 'loading') {
@@ -809,6 +809,38 @@
             }
             else {
                 show();
+            }
+        }
+        else if (msg.command === "form-visualizer.show-fetched-url") {
+            if (window !== window.top) return;
+
+            let cmsg = '', len = 25;
+
+            for (let i = 0; i < msg.opts.detailsArr.length; i++) {
+                let details = msg.opts.detailsArr[i];
+                let status = details.statusCode;
+
+                if (details.fromCache) {
+                    continue;
+                }
+
+                let line = '';
+
+                if (i === 0) {
+                    line += `FV: ${details.type}`;
+                }
+
+                line += ' '.repeat(len - line.length);
+                cmsg += (i > 0 ? '\n' : '') + line;
+
+                let urlBase = details.url.split(/[#?]/)[0];
+                let urlRest = details.url.substring(urlBase.length);
+                let url = urlBase + (urlRest.length > 60 ? urlRest.substring(0, 60) + '\u2026' : urlRest);
+                cmsg += `${status} ${url}`;
+            }
+
+            if (cmsg.length) {
+                console.log(cmsg);
             }
         }
     });

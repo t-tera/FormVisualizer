@@ -1,32 +1,53 @@
-window.bgGlobals = {respWorkBuf: {}, showResponseStatusConfig: true};
+const SHOW_URL_TYPES = [
+    //"beacon",
+    "csp_report",
+    //font
+    //image
+    //imageset
+    "main_frame",
+    "object",
+    "object_subrequest",
+    "ping",
+    //script
+    //speculative
+    //stylesheet
+    "sub_frame",
+    "web_manifest",
+    "websocket",
+    //xbl
+    "xmlhttprequest",
+    //xslt
+    //other
+];
+
+window.bgGlobals = {respWorkBuf: {}, showResponseStatusConfig: true, showFetchedURLsConfig: true};
 
 browser.webRequest.onHeadersReceived.addListener(
     (details) => {
-        if (details.frameId !== 0) {
-            return;
-        }
-
         let key = `${details.tabId}_${details.requestId}`;
-        (bgGlobals.respWorkBuf[key] = bgGlobals.respWorkBuf[key] || []).push(details);
+        (bgGlobals.respWorkBuf[key] ||= []).push(details);
     },
-    {types: ["main_frame"], urls: ["<all_urls>"]}
+    {types: SHOW_URL_TYPES, urls: ["<all_urls>"]}
 );
 
 browser.webRequest.onCompleted.addListener(
     (details) => {
-        if (details.frameId !== 0) {
-            return;
-        }
-
         let key = `${details.tabId}_${details.requestId}`;
 
-        if (bgGlobals.showResponseStatusConfig) {
-            showResponseStatus(details.tabId, bgGlobals.respWorkBuf[key]);
+        let showStatus = bgGlobals.showResponseStatusConfig;
+        let showUrl = bgGlobals.showFetchedURLsConfig;
+
+        if (showStatus && details.type === 'main_frame') {
+            showStatusUrl(details.tabId, bgGlobals.respWorkBuf[key], 'response-status');
+        }
+
+        if (showUrl) {
+            showStatusUrl(details.tabId, bgGlobals.respWorkBuf[key], 'fetched-url');
         }
 
         delete bgGlobals.respWorkBuf[key];
     },
-    {types: ["main_frame"], urls: ["<all_urls>"]}
+    {types: SHOW_URL_TYPES, urls: ["<all_urls>"]}
 );
 
 browser.commands.onCommand.addListener((command) => {

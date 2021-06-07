@@ -308,11 +308,19 @@ const wrapHilitHTML = (html) => {
     return '<div class="src" style="margin-left: ' + margin + 'em">' + ret + '</div>';
 };
 
-const showResponseStatus = (targetTabId, detailsArr) => {
+const showStatusUrl = async (targetTabId, detailsArr, type) => {
+    var tab = await browser.tabs.get(targetTabId);
+    var cmd = `form-visualizer.show-${type}`;
+
+    if (tab && tab.status === 'complete') {
+        sendCmdToTab(cmd, {detailsArr, tabId: targetTabId});
+        return;
+    }
+
     browser.tabs.onUpdated.addListener(((detailsArr, targetTabId) => {
         return function tempFunc(tabId, changeInfo) {
             if (changeInfo.status === 'complete' && tabId === targetTabId) {
-                sendCmdToTab("form-visualizer.show-response-status", {detailsArr, tabId});
+                sendCmdToTab(cmd, {detailsArr, tabId});
                 browser.tabs.onUpdated.removeListener(tempFunc);
             }
         }
